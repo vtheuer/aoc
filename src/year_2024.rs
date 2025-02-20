@@ -24,5 +24,6 @@ mod day18;
 mod day19;
 mod day20;
 mod day21;
+mod day22;
 
 pub const YEAR_2024: Year = year!(2024);
