@@ -90,3 +90,114 @@ impl<'a> Day<'a> for Day24<'a> {
         0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::util::Joinable;
+    use std::io::BufRead;
+
+    #[test]
+    fn test() {
+        let input = "ntg XOR fgs -> mjb
+y02 OR x01 -> tnw
+kwq OR kpj -> z05
+x00 OR x03 -> fst
+tgd XOR rvg -> z01
+vdt OR tnw -> bfw
+bfw AND frj -> z10
+ffh OR nrd -> bqk
+y00 AND y03 -> djm
+y03 OR y00 -> psh
+bqk OR frj -> z08
+tnw OR fst -> frj
+gnj AND tgd -> z11
+bfw XOR mjb -> z00
+x03 OR x00 -> vdt
+gnj AND wpb -> z02
+x04 AND y00 -> kjc
+djm OR pbm -> qhw
+nrd AND vdt -> hwm
+kjc AND fst -> rvg
+y04 OR y02 -> fgs
+y01 AND x02 -> pbm
+ntg OR kjc -> kwq
+psh XOR fgs -> tgd
+qhw XOR tgd -> z09
+pbm OR djm -> kpj
+x03 XOR y03 -> ffh
+x00 XOR y04 -> ntg
+bfw OR bqk -> z06
+nrd XOR fgs -> wpb
+frj XOR qhw -> z04
+bqk OR frj -> z07
+y03 OR x01 -> nrd
+hwm AND bqk -> z03
+tgd XOR rvg -> z12
+tnw OR pbm -> gnj"
+            .lines()
+            .map(|l| l.split(' ').collect::<Vec<_>>())
+            .collect::<Vec<_>>();
+
+        println!("digraph {{");
+
+        println!(
+            "{}",
+            input
+                .iter()
+                .enumerate()
+                .map(|(i, l)| format!("  {i} [label=\"{}\"]", l[1]))
+                .join("\n")
+        );
+
+        // let from = input
+        //     .iter()
+        //     .enumerate()
+        //     .map(|(i, l)| (l[4], i))
+        //     .collect::<AHashMap<_, _>>();
+        //
+        // let to = input
+        //     .iter()
+        //     .enumerate()
+        //     .flat_map(|(i, l)| [l[0], l[2]].into_iter().map(move |w| (w, i)))
+        //     .collect::<AHashMap<_, _>>();
+
+        println!(
+            "{}",
+            input
+                .iter()
+                .enumerate()
+                .flat_map(|(i, a)| {
+                    let out = a[4];
+                    input
+                        .iter()
+                        .enumerate()
+                        .filter(move |(_, b)| b[0] == out || b[2] == out)
+                        .map(move |(j, _)| format!("  {i} -> {j} [label=\"{out}\"]"))
+                })
+                .join("\n")
+        );
+
+        println!(
+            "{}",
+            input
+                .iter()
+                .enumerate()
+                .flat_map(|(i, l)| [l[0], l[2]].into_iter().map(move |w| (i, w)))
+                .filter(|(_, w)| w.starts_with('x') || w.starts_with('y'))
+                .map(|(i, w)| format!("  {} -> {i}", w))
+                .join("\n")
+        );
+
+        println!(
+            "{}",
+            input
+                .iter()
+                .enumerate()
+                .filter(|(_, l)| l[4].starts_with('z'))
+                .map(|(i, l)| format!("  {i} -> {}", l[4]))
+                .join("\n")
+        );
+
+        println!("}}");
+    }
+}
