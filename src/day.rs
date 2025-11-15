@@ -25,7 +25,7 @@ fn format_row(k: &str, v: &str, left: usize, right: usize, header: bool) -> Stri
         },
         " ".repeat(left - char_count(k)),
         " ".repeat(right - char_count(v)),
-        if header { v.bold() } else { ColoredString::from(v) }
+        if header { v.bold().red() } else { ColoredString::from(v) }
     )
 }
 
