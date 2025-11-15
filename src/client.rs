@@ -1,11 +1,11 @@
+use colored::Colorize;
+use regex::Regex;
+use reqwest::header::{HeaderMap, HeaderValue, COOKIE};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fs::{create_dir_all, read_to_string, write};
 use std::path::Path;
 use std::time::Duration;
-
-use regex::Regex;
-use reqwest::header::{HeaderMap, HeaderValue, COOKIE};
 
 use crate::util::first_line;
 
@@ -58,7 +58,7 @@ impl Client {
         if Path::new(&input_file).exists() {
             Ok(read_to_string(input_file)?)
         } else {
-            println!("Fetching input for day {}...", day);
+            println!("{}", format!("Fetching input for day {}...", day).dimmed());
             let input = self.fetch(&format!("https://adventofcode.com/{}/day/{}/input", year, day))?;
             assert_ne!(
                 first_line(&input),
@@ -75,7 +75,7 @@ impl Client {
         if let Some(title) = titles.get(&year).and_then(|days| days.get(&day)) {
             Ok(title.clone())
         } else {
-            println!("Fetching title for day {}...", day);
+            println!("{}", format!("Fetching title for day {}...", day).dimmed());
             let html = self.fetch(&format!("https://adventofcode.com/{}/day/{}", year, day))?;
             let title = self
                 .title_regex
