@@ -44,7 +44,7 @@ impl Year {
                     .iter()
                     .enumerate()
                     .filter_map(|(i, day)| day.map(|d| (i + 1, d)))
-                    .last()
+                    .next_back()
                     .unwrap(),
             },
             client,

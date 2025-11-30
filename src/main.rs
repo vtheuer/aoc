@@ -18,6 +18,7 @@ use crate::day::Day;
 use crate::util::format_duration;
 use crate::util::NumArg::{Last, Nth};
 use crate::year_2024::YEAR_2024;
+use crate::year_2025::YEAR_2025;
 
 mod client;
 mod day;
@@ -28,9 +29,10 @@ mod year_2021;
 mod year_2022;
 mod year_2023;
 mod year_2024;
+mod year_2025;
 
 fn main() {
-    let years = vec![YEAR_2020, YEAR_2021, YEAR_2022, YEAR_2023, YEAR_2024];
+    let years = vec![YEAR_2020, YEAR_2021, YEAR_2022, YEAR_2023, YEAR_2024, YEAR_2025];
     let get_year = |y| match parse_arg::<u16>("year", y) {
         Nth(nth) => years
             .iter()
