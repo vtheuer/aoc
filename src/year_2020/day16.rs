@@ -1,6 +1,6 @@
-use std::cell::Cell;
-
 use ahash::AHashSet;
+use std::cell::Cell;
+use std::io::BufRead;
 
 use crate::day::Day;
 
@@ -17,7 +17,7 @@ fn parse_ticket(line: &str) -> Vec<usize> {
     line.split(',').map(str::parse).map(Result::unwrap).collect()
 }
 
-fn parse(input: &str) -> Option<Day16> {
+fn parse(input: &'_ str) -> Option<Day16<'_>> {
     let mut parts = input.split("\n\n");
     Some(Day16 {
         constraints: parts

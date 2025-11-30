@@ -62,7 +62,7 @@ struct Tile {
 }
 
 fn border<'a>(side: impl Iterator<Item = &'a bool>) -> (u16, u16) {
-    let ltr = side.fold(0, |r, &p| ((r << 1) | if p { 1 } else { 0 }));
+    let ltr = side.fold(0, |r, &p| (r << 1) | if p { 1 } else { 0 });
     let rtl = (0..TILE_SIZE).fold(0, |r, i| (r << 1) | ((ltr & (1 << i)) >> i));
     (ltr, rtl)
 }

@@ -91,7 +91,7 @@ impl<'a> Rule<'a> {
         }
     }
 
-    fn apply(&self, part: &Part) -> Option<RuleResult> {
+    fn apply(&'_ self, part: &Part) -> Option<RuleResult<'_>> {
         if self.condition.as_ref().map(|c| c.matches(part)).unwrap_or(true) {
             Some(self.result)
         } else {
@@ -182,7 +182,7 @@ impl<'a> Workflow<'a> {
         }
     }
 
-    fn apply(&self, part: &Part) -> RuleResult {
+    fn apply(&'_ self, part: &Part) -> RuleResult<'_> {
         self.rules.iter().find_map(|r| r.apply(part)).unwrap()
     }
 
