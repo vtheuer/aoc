@@ -5,5 +5,6 @@ use crate::year::Year;
 
 mod day01;
 mod day02;
+mod day03;
 
 pub const YEAR_2025: Year = year!(2025);
