@@ -96,6 +96,30 @@ impl<T> Grid<T> {
         self.next_index(i, direction).map(|n| self[n])
     }
 
+    pub fn neighboring_indices(&self, (x, y): (usize, usize), diagonals: bool) -> impl Iterator<Item = (usize, usize)> {
+        let ix = x as isize;
+        let iy = y as isize;
+        let w = self.width as isize;
+        let h = self.height as isize;
+        if diagonals {
+            vec![
+                (ix - 1, iy - 1),
+                (ix - 1, iy),
+                (ix - 1, iy + 1),
+                (ix, iy - 1),
+                (ix, iy + 1),
+                (ix + 1, iy - 1),
+                (ix + 1, iy),
+                (ix + 1, iy + 1),
+            ]
+        } else {
+            vec![(ix, iy - 1), (ix - 1, iy), (ix + 1, iy), (ix, iy + 1)]
+        }
+        .into_iter()
+        .filter(move |&(x, y)| x >= 0 && y >= 0 && x < w && y < h)
+        .map(move |(x, y)| (x as usize, y as usize))
+    }
+
     pub fn rows(&self) -> impl Iterator<Item = &Vec<T>> {
         self.grid.iter()
     }
