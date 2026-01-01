@@ -1,19 +1,50 @@
 use crate::day::Day;
 use crate::util::{Joinable, SortableByKey};
-use ahash::{AHashMap, AHashSet};
-use std::collections::BTreeSet;
-use std::convert::identity;
+use ahash::AHashMap;
 
 pub struct Day08 {
     boxes: Vec<(usize, usize, usize)>,
+    distances: Vec<(usize, usize, usize)>,
 }
 
-fn root(parents: &[usize], i: usize) -> usize {
-    let mut r = i;
-    while parents[r] != r {
-        r = parents[r];
+trait UnionFind {
+    fn parent(&self, x: usize) -> usize;
+
+    fn parent_mut(&mut self, x: usize) -> &mut usize;
+    fn find(&mut self, x: usize) -> usize;
+    fn union(&mut self, x: usize, y: usize);
+}
+
+impl UnionFind for Vec<usize> {
+    fn parent(&self, x: usize) -> usize {
+        self[x]
     }
-    r
+
+    fn parent_mut(&mut self, x: usize) -> &mut usize {
+        &mut self[x]
+    }
+
+    fn find(&mut self, x: usize) -> usize {
+        if self.parent(x) != x {
+            *self.parent_mut(x) = self.find(self.parent(x));
+        }
+        self.parent(x)
+    }
+
+    fn union(&mut self, x: usize, y: usize) {
+        let x_root = self.find(x);
+        let y_root = self.find(y);
+
+        if x_root == y_root {
+            return;
+        }
+
+        if x_root < y_root {
+            *self.parent_mut(y_root) = x_root;
+        } else {
+            *self.parent_mut(x_root) = y_root;
+        }
+    }
 }
 
 impl Day<'_> for Day08 {
@@ -21,44 +52,63 @@ impl Day<'_> for Day08 {
     type T2 = usize;
 
     fn new(input: &str) -> Self {
+        let boxes = input
+            .lines()
+            .filter_map(|l| {
+                let mut ns = l.split(',').filter_map(|n| n.parse::<usize>().ok());
+                Some((ns.next()?, ns.next()?, ns.next()?))
+            })
+            .collect::<Vec<_>>();
+        let box_count = boxes.len();
+
         Self {
-            boxes: input
-                .lines()
-                .filter_map(|l| {
-                    let mut ns = l.split(',').filter_map(|n| n.parse().ok());
-                    Some((ns.next()?, ns.next()?, ns.next()?))
+            distances: (0..box_count)
+                .flat_map(|i| (i + 1..box_count).map(move |j| (i, j)))
+                .map(|(i, j)| {
+                    let a = boxes[i];
+                    let b = boxes[j];
+                    (
+                        a.0.abs_diff(b.0).pow(2) + a.1.abs_diff(b.1).pow(2) + a.2.abs_diff(b.2).pow(2),
+                        i,
+                        j,
+                    )
                 })
+                .sorted_unstable_by_key(|(d, _, _)| *d)
                 .collect(),
+            boxes,
         }
     }
 
     fn part_1(&self) -> Self::T1 {
-        let box_count = self.boxes.len();
-        let mut distances = Vec::new();
+        let mut parents = (0..self.boxes.len()).collect::<Vec<_>>();
 
-        for i in 0..box_count {
-            for j in i + 1..box_count {
-                let a = self.boxes[i];
-                let b = self.boxes[j];
-                let distance = a.0.abs_diff(b.0).pow(2) + a.1.abs_diff(b.1).pow(2) + a.2.abs_diff(b.2).pow(2);
-                distances.push((distance, i, j));
-            }
-        }
-        distances.sort_by_key(|&(d, _, _)| d);
-        let mut parents = (0..box_count).collect::<Vec<_>>();
-
-        for &(_, i, j) in distances.iter().take(10) {
-            parents[j] = root(&parents, i);
-            println!("({}, {}) -> parents[{}] = {}", i, j, j, parents[j]);
+        for &(_, i, j) in self.distances.iter().take(1000) {
+            parents.union(i, j);
         }
 
-        println!("{}", parents.iter().enumerate().map(|(i, p)| format!("{i} -> {p}")).join("\n"));
-        let counts: AHashMap<usize, usize> = parents.into_iter().fold(AHashMap::new(), |mut counts, root| {
-            counts.entry(root).and_modify(|c| *c += 1).or_insert(1);
+        let counts = (0..parents.len()).fold(AHashMap::new(), |mut counts, i| {
+            counts.entry(parents.find(i)).and_modify(|c| *c += 1).or_insert(1);
             counts
         });
 
-        counts.values().sorted_unstable_by_key(|&&c| c).rev().take(3).map(|c| dbg!(c)).product()
+        for i in 0..parents.len() {
+            if parents[parents[i]] != parents[i] {
+                panic!(
+                    "parent[{}] of {} is not itself but {}\n {}",
+                    i,
+                    parents[i],
+                    parents[parents[i]],
+                    parents
+                        .iter()
+                        .enumerate()
+                        .filter(|&(i, &p)| i != p)
+                        .map(|(i, &p)| format!("{} -> {}", i, p))
+                        .join("\n")
+                );
+            }
+        }
+
+        counts.values().sorted_unstable_by_key(|&&c| c).rev().take(3).product()
     }
 
     fn part_2(&self) -> Self::T2 {
